@@ -26,9 +26,17 @@ pub fn build(b: *std.Build) !void {
     build_bin(b, target, optimize);
 }
 
-const bin_files = .{ "app/main.cpp" } ++ src_files;
-
+const bin_files = .{ "app/main.cpp" } ++ src_files ++ lib_files;
 const src_files = .{};
+const lib_files = .{
+    "libs/imgui/imgui.cpp",
+    "libs/imgui/imgui_impl_sdl3.cpp",
+    "libs/imgui/imgui_impl_sdlgpu3.cpp", 
+    "libs/imgui/imgui_draw.cpp", 
+    "libs/imgui/imgui_demo.cpp", 
+    "libs/imgui/imgui_widgets.cpp", 
+    "libs/imgui/imgui_tables.cpp", 
+};
 
 fn build_bin(
     b: *std.Build,
