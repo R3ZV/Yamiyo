@@ -31,7 +31,7 @@ const src_files = .{};
 const lib_files = .{
     "libs/imgui/imgui.cpp",
     "libs/imgui/imgui_impl_sdl3.cpp",
-    "libs/imgui/imgui_impl_sdlgpu3.cpp", 
+    "libs/imgui/imgui_impl_sdlrenderer3.cpp", 
     "libs/imgui/imgui_draw.cpp", 
     "libs/imgui/imgui_demo.cpp", 
     "libs/imgui/imgui_widgets.cpp", 
