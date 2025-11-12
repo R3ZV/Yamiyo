@@ -103,6 +103,7 @@ SDL_AppInit(void** appstate, int argc, char** argv) {
 
     state->debug_console = false;
     state->imgui_io = &io;
+    state->game_state.randomise_entities(state->entities_cnt);
 
     *appstate = state;
     return SDL_APP_CONTINUE;
@@ -132,7 +133,6 @@ SDL_AppIterate(void* appstate) {
         return SDL_APP_CONTINUE;
     }
 
-    state->game_state.render_entities();
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGui_ImplSDLRenderer3_NewFrame();
@@ -140,19 +140,23 @@ SDL_AppIterate(void* appstate) {
     ImGui::NewFrame();
 
     bool show_demo_window = true;
-    if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
+    if (state->debug_console) ImGui::ShowDemoWindow(&show_demo_window);
 
     ImGui::Render();
     SDL_SetRenderScale(state->renderer, state->imgui_io->DisplayFramebufferScale.x, state->imgui_io->DisplayFramebufferScale.y);
     SDL_SetRenderDrawColorFloat(state->renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     SDL_RenderClear(state->renderer);
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state->renderer);
+
+    state->game_state.render_entities();
     SDL_RenderPresent(state->renderer);
+    state->game_state.update_entities();
 
     return SDL_APP_CONTINUE;
 }
 
-void SDL_AppQuit(void* appstate, SDL_AppResult result) {
+void
+SDL_AppQuit(void* appstate, SDL_AppResult result) {
     if (appstate != NULL) {
         AppState *state = (AppState*)appstate;
         ImGui_ImplSDLRenderer3_Shutdown();

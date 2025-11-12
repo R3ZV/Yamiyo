@@ -5,8 +5,11 @@
 
 struct Entity {
 public:
+    Entity() = default;
+
     SDL_FRect rect;
     float center_x, center_y;
+    float velocity_x, velocity_y;
 
     Entity(float center_x, float center_y, float w, float h);
 };
