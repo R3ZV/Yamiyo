@@ -3,23 +3,39 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include "../src/game.h"
+
 #include "../libs/imgui/imgui.h"
 #include "../libs/imgui/imgui_impl_sdl3.h"
 #include "../libs/imgui/imgui_impl_sdlrenderer3.h"
 
 struct AppState {
+public:
     static const char* GAME_NAME;
     static const char* GAME_VERSION;
 
-    const int32_t WIN_WIDTH = 1280;
-    const int32_t WIN_HEIGHT = 1024;
+    static const int32_t WIN_WIDTH = 1280;
+    static const int32_t WIN_HEIGHT = 1024;
 
     SDL_Window* window;
     SDL_Renderer* renderer;
     ImGuiIO* imgui_io;
+    GameState game_state;
 
     Uint64 last_step;
+
     bool debug_console;
+    int32_t entities_cnt;
+
+    AppState(SDL_Window* win, SDL_Renderer* renderer) :
+        window(win),
+        renderer(renderer),
+        imgui_io(nullptr),
+        last_step(0),
+        entities_cnt(10),
+        debug_console(false),
+        game_state(10, renderer, WIN_WIDTH, WIN_HEIGHT) 
+    {}
 };
 
 const char* AppState::GAME_NAME = "Yamiyo";
@@ -27,12 +43,7 @@ const char* AppState::GAME_VERSION = "v0.1.0";
 
 SDL_AppResult
 SDL_AppInit(void** appstate, int argc, char** argv) {
-    AppState* state = new AppState();
-    if (!state) {
-        return SDL_APP_FAILURE;
-    }
-
-    SDL_SetAppMetadata(state->GAME_NAME, state->GAME_VERSION, "");
+    SDL_SetAppMetadata(AppState::GAME_NAME, AppState::GAME_VERSION, "");
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         SDL_Log("Error: SDL_Init(): %s\n", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -41,13 +52,18 @@ SDL_AppInit(void** appstate, int argc, char** argv) {
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    SDL_Window* window = SDL_CreateWindow(state->GAME_NAME, state->WIN_WIDTH * main_scale, state->WIN_HEIGHT * main_scale, window_flags);
+    SDL_Window* window = SDL_CreateWindow(
+        AppState::GAME_NAME,
+        AppState::WIN_WIDTH * main_scale,
+        AppState::WIN_HEIGHT * main_scale,
+        window_flags
+    );
+
     if (window == nullptr) {
         SDL_Log("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-    state->window = window;
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
     SDL_SetRenderVSync(renderer, 1);
@@ -55,7 +71,11 @@ SDL_AppInit(void** appstate, int argc, char** argv) {
         SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    state->renderer = renderer;
+    AppState* state = new AppState(window, renderer);
+    if (!state) {
+        return SDL_APP_FAILURE;
+    }
+
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_ShowWindow(window);
 
@@ -111,6 +131,8 @@ SDL_AppIterate(void* appstate) {
         SDL_Delay(10);
         return SDL_APP_CONTINUE;
     }
+
+    state->game_state.render_entities();
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGui_ImplSDLRenderer3_NewFrame();

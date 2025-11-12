@@ -27,7 +27,10 @@ pub fn build(b: *std.Build) !void {
 }
 
 const bin_files = .{ "app/main.cpp" } ++ src_files ++ lib_files;
-const src_files = .{};
+const src_files = .{
+    "src/entity.cpp",
+    "src/game.cpp",
+};
 const lib_files = .{
     "libs/imgui/imgui.cpp",
     "libs/imgui/imgui_impl_sdl3.cpp",
