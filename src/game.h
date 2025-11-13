@@ -9,8 +9,8 @@
 struct GameState {
 public:
     const int32_t MAX_ENTITIES = 100'000;
-    const float ENTITY_HEIGHT = 60;
-    const float ENTITY_WIDTH = 80;
+    const float ENTITY_HEIGHT = 5;
+    const float ENTITY_WIDTH = 5;
 
     int32_t entities_cnt;
     std::vector<Entity> entities;
@@ -26,7 +26,7 @@ public:
     /// It will fill the `entities` with `cnt` entities
     /// with random coordinates.
     void
-    randomise_entities(size_t cnt);
+    randomise_entities();
 
     /// It will simply go through the `entities` vector and
     /// call the specific drawing function for the entity.
@@ -35,4 +35,11 @@ public:
 
     void
     update_entities();
+
+    void
+    check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
+
+private:
+    void
+    check_collision_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
 };
