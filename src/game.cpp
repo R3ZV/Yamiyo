@@ -13,8 +13,8 @@ GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_W
 {}
 
 void
-GameState::randomise_entities(size_t cnt) {
-    for (size_t i = 0; i < cnt; i++) {
+GameState::randomise_entities() {
+    for (size_t i = 0; i < this->entities_cnt; i++) {
         float center_x = x_dist(gen);
         float center_y = y_dist(gen);
         entities[i] = Entity(center_x, center_y, ENTITY_WIDTH, ENTITY_HEIGHT);
