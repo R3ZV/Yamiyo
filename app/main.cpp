@@ -11,6 +11,11 @@
 #include "../libs/imgui/imgui_impl_sdl3.h"
 #include "../libs/imgui/imgui_impl_sdlrenderer3.h"
 
+#ifdef __linux__
+    #include <unistd.h>
+    #include <fstream>
+#endif
+
 struct AppState {
 public:
     static const char* GAME_NAME;
@@ -25,12 +30,13 @@ public:
     ImGuiIO* imgui_io;
     GameState game_state;
 
-    Uint64 last_step;
-    double fps;
 
     bool debug_console;
+    Uint64 last_step;
     int32_t entities_cnt;
     int32_t last_entities_cnt;
+    double fps;
+    double memory;
 
     AppState(SDL_Window* win, SDL_Renderer* renderer) :
         window(win),
@@ -134,8 +140,28 @@ SDL_AppEvent(void* appstate, SDL_Event* event) {
 }
 
 
+// returns the number of mb used by this process
+// it only works on Linux.
+double
+get_curr_mem_usage() {
+#ifdef __linux__
+    long rss = 0;
+    std::ifstream statm("/proc/self/statm");
+    if (statm.is_open()) {
+        std::string ignore;
+        statm >> ignore >> rss;
+    }
+    statm.close();
+
+    long page_size = sysconf(_SC_PAGESIZE);
+    return (rss * page_size) / (1024.0 * 1024.0);
+#else
+    return 0.0;
+#endif
+}
+
 void
-compute_fps(void* appstate) {
+compute_stats(void* appstate) {
     AppState* state = (AppState*) appstate;
 
     Uint64 curr_step = SDL_GetPerformanceCounter();
@@ -147,6 +173,7 @@ compute_fps(void* appstate) {
     }
 
     state->last_step = curr_step;
+    state->memory = get_curr_mem_usage();
 }
 
 SDL_AppResult
@@ -158,7 +185,7 @@ SDL_AppIterate(void* appstate) {
         return SDL_APP_CONTINUE;
     }
 
-    compute_fps(appstate);
+    compute_stats(appstate);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGui_ImplSDLRenderer3_NewFrame();
@@ -167,8 +194,8 @@ SDL_AppIterate(void* appstate) {
 
     if (state->debug_console) {
         ImGui::Begin("Debug Console");
-        ImGui::Text("FPS: %f", state->fps);
-        ImGui::Text("Memory usage: TODO");
+        ImGui::Text("FPS: %.2f", state->fps);
+        ImGui::Text("Memory usage: %.2f MB", state->memory);
 
         ImGui::SliderInt("Entities", &state->entities_cnt, 0, state->MAX_ENTITIES);
 
