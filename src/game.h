@@ -35,4 +35,11 @@ public:
 
     void
     update_entities();
+
+    void
+    check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
+
+private:
+    void
+    check_collision_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
 };

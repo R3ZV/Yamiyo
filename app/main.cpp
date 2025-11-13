@@ -151,6 +151,7 @@ SDL_AppIterate(void* appstate) {
     state->game_state.render_entities();
     SDL_RenderPresent(state->renderer);
     state->game_state.update_entities();
+    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
 
     return SDL_APP_CONTINUE;
 }

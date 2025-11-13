@@ -33,9 +33,29 @@ GameState::render_entities() {
 void
 GameState::update_entities() {
     for (size_t i = 0; i < this->entities_cnt; i++) {
-        this->entities[i].center_x += this->entities[i].velocity_x;
-        this->entities[i].center_y += this->entities[i].velocity_y;
-        this->entities[i].rect.x  = this->entities[i].center_x - this->entities[i].rect.w / 2;
-        this->entities[i].rect.y  = this->entities[i].center_y - this->entities[i].rect.h / 2;
+        auto& entity = this->entities[i];
+        entity.center_x += entity.velocity_x;
+        entity.center_y += entity.velocity_y;
+        entity.rect.x  = entity.center_x - entity.rect.w / 2;
+        entity.rect.y  = entity.center_y - entity.rect.h / 2;
+    };
+}
+
+void
+GameState::check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
+    this->check_collision_borders(WIN_WIDTH, WIN_HEIGHT);
+}
+
+void
+GameState::check_collision_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
+    for (size_t i = 0; i < this->entities_cnt; i++) {
+        auto& entity = this->entities[i];
+        if (entity.center_x + entity.rect.w >= WIN_WIDTH || entity.center_x - entity.rect.w <= 0) {
+            entity.velocity_x *= -1;
+        }
+
+        if (entity.center_y + entity.rect.h >= WIN_HEIGHT || entity.center_y - entity.rect.h <= 0) {
+            entity.velocity_y *= -1;
+        }
     };
 }
