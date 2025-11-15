@@ -31,6 +31,7 @@ public:
 
 
     bool debug_console;
+    bool show_grid;
     Uint64 last_step;
     int32_t entities_cnt;
     int32_t last_entities_cnt;
@@ -186,19 +187,6 @@ SDL_AppIterate(void* appstate) {
 
     compute_stats(appstate);
 
-    if (state->last_entities_cnt != state->entities_cnt) {
-        state->game_state.entities_cnt = state->entities_cnt;
-        state->last_entities_cnt = state->entities_cnt;
-        state->game_state.randomise_entities();
-    }
-
-    state->game_state.render_entities();
-    SDL_RenderPresent(state->renderer);
-    state->game_state.update_entities();
-    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
-
-
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -207,17 +195,44 @@ SDL_AppIterate(void* appstate) {
         ImGui::Begin("Debug Console");
         ImGui::Text("FPS: %.2f", state->fps);
         ImGui::Text("Memory usage: %.2f MB", state->memory);
+        ImGui::Checkbox("Show Spatial Grid", &state->show_grid);
 
         ImGui::SliderInt("Entities", &state->entities_cnt, 0, state->MAX_ENTITIES);
 
         ImGui::End();
     }
-
     ImGui::Render();
-    SDL_SetRenderScale(state->renderer, state->imgui_io->DisplayFramebufferScale.x, state->imgui_io->DisplayFramebufferScale.y);
+
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     SDL_SetRenderDrawColorFloat(state->renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     SDL_RenderClear(state->renderer);
+
+    if (state->last_entities_cnt != state->entities_cnt) {
+        state->game_state.entities_cnt = state->entities_cnt;
+        state->last_entities_cnt = state->entities_cnt;
+        state->game_state.randomise_entities();
+    }
+
+    state->game_state.render_entities();
+    state->game_state.update_entities();
+    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
+
+    if (state->show_grid) {
+        const int CELL_SIZE = state->game_state.sph.cell_size;
+        SDL_SetRenderDrawColor(state->renderer, 255, 255, 255, 50);
+
+        for (int x = 0; x <= state->WIN_WIDTH; x += CELL_SIZE) {
+            SDL_RenderLine(state->renderer, (float)x, 0, (float)x, (float)state->WIN_HEIGHT);
+        }
+
+        for (int y = 0; y <= state->WIN_HEIGHT; y += CELL_SIZE) {
+            SDL_RenderLine(state->renderer, 0, (float)y, (float)state->WIN_WIDTH, (float)y);
+        }
+    }
+
+    SDL_SetRenderScale(state->renderer, state->imgui_io->DisplayFramebufferScale.x, state->imgui_io->DisplayFramebufferScale.y);
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state->renderer);
+    SDL_RenderPresent(state->renderer);
 
     return SDL_APP_CONTINUE;
 }

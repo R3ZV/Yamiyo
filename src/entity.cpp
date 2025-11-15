@@ -3,8 +3,8 @@
 Entity::Entity(float center_x, float center_y, float w, float h) {
     this->center_x = center_x;
     this->center_y = center_y;
-    this->velocity_x = 10;
-    this->velocity_y = 10;
+    this->velocity_x = 1;
+    this->velocity_y = 1;
 
     this->rect = SDL_FRect {
         .x = center_x - w / 2,

@@ -8,7 +8,6 @@
 
 struct SpatialHash {
 private:
-    int32_t cell_size;
 
     std::unordered_map<int, std::vector<Entity*>> cell_map;
 
@@ -16,6 +15,7 @@ private:
     get_key(int32_t cell_x, int32_t cell_y);
 
 public:
+    int32_t cell_size;
     SpatialHash(int32_t size) : cell_size(size) {}
 
     void
