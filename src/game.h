@@ -5,6 +5,7 @@
 #include <random>
 
 #include "entity.h"
+#include "spatial-hashing.h"
 
 struct GameState {
 public:
@@ -16,6 +17,7 @@ public:
     std::vector<Entity> entities;
 
     SDL_Renderer *const renderer;
+    SpatialHash sph;
 
     std::random_device rd;
     std::mt19937 gen;
@@ -41,5 +43,12 @@ public:
 
 private:
     void
-    check_collision_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
+    check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
+
+    void
+    check_collisions_entities();
+
+    void
+    compute_spatial_hash();
+
 };

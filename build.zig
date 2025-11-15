@@ -30,7 +30,9 @@ const bin_files = .{ "app/main.cpp" } ++ src_files ++ lib_files;
 const src_files = .{
     "src/entity.cpp",
     "src/game.cpp",
+    "src/spatial-hashing.cpp",
 };
+
 const lib_files = .{
     "libs/imgui/imgui.cpp",
     "libs/imgui/imgui_impl_sdl3.cpp",

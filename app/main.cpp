@@ -1,6 +1,5 @@
 #define SDL_MAIN_USE_CALLBACKS 1
 
-
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_keycode.h>
@@ -187,6 +186,18 @@ SDL_AppIterate(void* appstate) {
 
     compute_stats(appstate);
 
+    if (state->last_entities_cnt != state->entities_cnt) {
+        state->game_state.entities_cnt = state->entities_cnt;
+        state->last_entities_cnt = state->entities_cnt;
+        state->game_state.randomise_entities();
+    }
+
+    state->game_state.render_entities();
+    SDL_RenderPresent(state->renderer);
+    state->game_state.update_entities();
+    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
+
+
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGui_ImplSDLRenderer3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
@@ -207,17 +218,6 @@ SDL_AppIterate(void* appstate) {
     SDL_SetRenderDrawColorFloat(state->renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     SDL_RenderClear(state->renderer);
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state->renderer);
-
-    if (state->last_entities_cnt != state->entities_cnt) {
-        state->game_state.entities_cnt = state->entities_cnt;
-        state->last_entities_cnt = state->entities_cnt;
-        state->game_state.randomise_entities();
-    }
-
-    state->game_state.render_entities();
-    SDL_RenderPresent(state->renderer);
-    state->game_state.update_entities();
-    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
 
     return SDL_APP_CONTINUE;
 }

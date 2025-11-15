@@ -12,4 +12,10 @@ public:
     float velocity_x, velocity_y;
 
     Entity(float center_x, float center_y, float w, float h);
+
+    bool
+    collides_x(Entity& other);
+
+    bool
+    collides_y(Entity& other);
 };

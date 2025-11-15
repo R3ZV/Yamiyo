@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 
 GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_WIDTH, int32_t WIN_HEIGHT) :
+    // We want to perfectly divide both win_width and win_height
+    sph(8),
     entities_cnt(entities_cnt),
     entities(size_t(MAX_ENTITIES)),
     renderer(renderer),
@@ -19,6 +21,7 @@ GameState::randomise_entities() {
         float center_y = y_dist(gen);
         entities[i] = Entity(center_x, center_y, ENTITY_WIDTH, ENTITY_HEIGHT);
     }
+    this->compute_spatial_hash();
 }
 
 void
@@ -39,15 +42,43 @@ GameState::update_entities() {
         entity.rect.x  = entity.center_x - entity.rect.w / 2;
         entity.rect.y  = entity.center_y - entity.rect.h / 2;
     };
+    this->compute_spatial_hash();
 }
 
 void
 GameState::check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
-    this->check_collision_borders(WIN_WIDTH, WIN_HEIGHT);
+    this->check_collisions_borders(WIN_WIDTH, WIN_HEIGHT);
+    this->check_collisions_entities();
 }
 
 void
-GameState::check_collision_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
+GameState::check_collisions_entities() {
+    for (size_t i = 0; i < this->entities_cnt; i++) {
+        auto& entity = this->entities[i];
+        auto entities_nearby = this->sph.get_nearby(&entity);
+        for (auto other : entities_nearby) {
+            if (entity.collides_x(*other)) {
+                entity.velocity_x *= -1;
+            }
+
+            if (entity.collides_y(*other)) {
+                entity.velocity_y *= -1;
+            }
+        }
+    }
+}
+
+void
+GameState::compute_spatial_hash() {
+    this->sph.clear();
+    for (size_t i = 0; i < this->entities_cnt; i++) {
+        auto& entity = this->entities[i];
+        this->sph.insert(&entity);
+    };
+}
+
+void
+GameState::check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
     for (size_t i = 0; i < this->entities_cnt; i++) {
         auto& entity = this->entities[i];
         if (entity.center_x + entity.rect.w >= WIN_WIDTH || entity.center_x - entity.rect.w <= 0) {
@@ -58,4 +89,4 @@ GameState::check_collision_borders(const int32_t WIN_WIDTH, const int32_t WIN_HE
             entity.velocity_y *= -1;
         }
     };
-}
+};

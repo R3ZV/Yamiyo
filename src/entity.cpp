@@ -13,3 +13,15 @@ Entity::Entity(float center_x, float center_y, float w, float h) {
         .h = h,
     };
 }
+
+bool
+Entity::collides_x(Entity& other) {
+    return this->rect.x < other.rect.x + other.rect.w &&
+           this->rect.x + this->rect.w > other.rect.x;
+}
+
+bool
+Entity::collides_y(Entity& other) {
+    return this->rect.y < other.rect.y + other.rect.h &&
+           this->rect.y + this->rect.h > other.rect.y;
+}
