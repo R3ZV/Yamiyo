@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_WIDTH, int32_t WIN_HEIGHT) :
     // We want to perfectly divide both win_width and win_height
@@ -11,15 +12,42 @@ GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_W
     renderer(renderer),
     gen(rd()),
     x_dist(ENTITY_WIDTH, static_cast<float>(WIN_WIDTH) - ENTITY_WIDTH),
-    y_dist(ENTITY_HEIGHT, static_cast<float>(WIN_HEIGHT) - ENTITY_HEIGHT)
-{}
+    y_dist(ENTITY_HEIGHT, static_cast<float>(WIN_HEIGHT) - ENTITY_HEIGHT) {
+
+    this->get_texture("assets/mob1.png", "enemy");
+}
+
+SDL_Texture*
+GameState::get_texture(const std::string& path, const std::string& name) {
+    if (textures.find(name) != textures.end()) {
+        return textures[name];
+    }
+
+    SDL_Texture* new_texture = IMG_LoadTexture(renderer, path.c_str());
+    if (!new_texture) {
+        SDL_Log("Error loading %s: %s", path.c_str(), SDL_GetError());
+        return nullptr; 
+    }
+
+    textures[name] = new_texture;
+    return new_texture;
+}
+
+void
+GameState::cleanup_textures() {
+    for (auto& pair : textures) {
+        SDL_DestroyTexture(pair.second);
+    }
+    textures.clear();
+}
 
 void
 GameState::randomise_entities() {
     for (size_t i = 0; i < this->entities_cnt; i++) {
         float center_x = x_dist(gen);
         float center_y = y_dist(gen);
-        entities[i] = Entity(center_x, center_y, ENTITY_WIDTH, ENTITY_HEIGHT);
+        entities[i] = Entity(center_x, center_y, ENTITY_WIDTH, ENTITY_HEIGHT,
+                             textures["enemy"]);
     }
     this->compute_spatial_hash();
 }
@@ -29,7 +57,7 @@ GameState::render_entities() {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 255, 255);
     for (size_t i = 0; i < this->entities_cnt; i++) {
         auto entity = this->entities[i];
-        SDL_RenderFillRect(this->renderer, &entity.rect);
+        SDL_RenderTexture(renderer, entity.texture, NULL, &entity.rect);
     }
 }
 

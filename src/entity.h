@@ -8,10 +8,11 @@ public:
     Entity() = default;
 
     SDL_FRect rect;
+    SDL_Texture* texture;
     float center_x, center_y;
     float velocity_x, velocity_y;
 
-    Entity(float center_x, float center_y, float w, float h);
+    Entity(float center_x, float center_y, float w, float h, SDL_Texture* texture);
 
     void
     swarm_collision(Entity& other);

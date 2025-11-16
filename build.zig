@@ -48,6 +48,8 @@ fn build_bin(
     target: ResolvedTarget,
     optimize: OptimizeMode,
 ) void {
+    const sdl3_image = b.dependency("SDL_image", .{}).artifact("SDL3_image");
+
     const exe = b.addExecutable(.{
         .name = "yamiyo",
         .root_module = b.createModule(.{
@@ -57,6 +59,7 @@ fn build_bin(
         }),
     });
 
+    exe.linkLibrary(sdl3_image);
     exe.linkLibCpp();
     exe.linkSystemLibrary("SDL3");
 

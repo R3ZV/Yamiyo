@@ -1,14 +1,17 @@
 #include "entity.h"
 
-Entity::Entity(float center_x, float center_y, float w, float h) {
+Entity::Entity(float center_x, float center_y, float w, float h, SDL_Texture* texture) {
+    this->texture = texture;
     this->center_x = center_x;
     this->center_y = center_y;
-    this->velocity_x = 1;
-    this->velocity_y = 1;
+    this->velocity_x = int32_t(center_x) % 10;
+    this->velocity_y = int32_t(center_y) % 10;
 
     if (int32_t(this->center_x) & 1) this->velocity_x *= -1;
     if (int32_t(this->center_y) & 1) this->velocity_y *= -1;
 
+    if (int32_t(this->center_x) & 1) this->velocity_x *= -1;
+    if (int32_t(this->center_y) & 1) this->velocity_y *= -1;
 
     this->rect = SDL_FRect {
         .x = center_x - w / 2,

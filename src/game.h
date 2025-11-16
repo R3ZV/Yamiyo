@@ -10,11 +10,12 @@
 struct GameState {
 public:
     const int32_t MAX_ENTITIES = 100'000;
-    const float ENTITY_HEIGHT = 5;
-    const float ENTITY_WIDTH = 5;
+    const float ENTITY_HEIGHT = 8;
+    const float ENTITY_WIDTH = 8;
 
     int32_t entities_cnt;
     std::vector<Entity> entities;
+    std::unordered_map<std::string, SDL_Texture*> textures;
 
     SDL_Renderer *const renderer;
     SpatialHash sph;
@@ -51,4 +52,9 @@ private:
     void
     compute_spatial_hash();
 
+    SDL_Texture*
+    get_texture(const std::string& path, const std::string& name);
+
+    void
+    cleanup_textures();
 };
