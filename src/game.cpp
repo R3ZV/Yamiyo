@@ -57,13 +57,9 @@ GameState::check_collisions_entities() {
         auto& entity = this->entities[i];
         auto entities_nearby = this->sph.get_nearby(&entity);
         for (auto other : entities_nearby) {
-            if (entity.collides_x(*other)) {
-                entity.velocity_x *= -1;
-            }
+            if (&entity == other) continue;
 
-            if (entity.collides_y(*other)) {
-                entity.velocity_y *= -1;
-            }
+            entity.swarm_collision(*other);
         }
     }
 }

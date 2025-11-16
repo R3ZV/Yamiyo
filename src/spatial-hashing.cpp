@@ -20,8 +20,6 @@ SpatialHash::insert(Entity* entity) {
 
     int32_t key = this->get_key(cell_x, cell_y);
     cell_map[key].push_back(entity);
-
-    // TODO: Add entity in more buckets if it overlaps multiple cells
 }
 
 std::vector<Entity*>
@@ -36,9 +34,7 @@ SpatialHash::get_nearby(Entity* entity) {
         for (int y = -1; y <= 1; y++) {
             int32_t key = this->get_key(cell_x + x, cell_y + y);
 
-            // If this cell has entities, add them to our check list
             if (cell_map.count(key)) {
-                // We insert the whole vector of that cell
                 auto& cellEntities = cell_map[key];
                 nearby.insert(nearby.end(), cellEntities.begin(), cellEntities.end());
             }

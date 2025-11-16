@@ -42,7 +42,7 @@ public:
         window(win),
         renderer(renderer),
         imgui_io(nullptr),
-        game_state(0, renderer, WIN_WIDTH, WIN_HEIGHT),
+        game_state(5, renderer, WIN_WIDTH, WIN_HEIGHT),
         debug_console(false),
         last_step(SDL_GetPerformanceCounter())
     {}

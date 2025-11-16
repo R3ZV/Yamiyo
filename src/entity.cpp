@@ -14,14 +14,22 @@ Entity::Entity(float center_x, float center_y, float w, float h) {
     };
 }
 
-bool
-Entity::collides_x(Entity& other) {
-    return this->rect.x < other.rect.x + other.rect.w &&
-           this->rect.x + this->rect.w > other.rect.x;
-}
+void
+Entity::swarm_collision(Entity& other) {
+    float diff_x = this->center_x - other.center_x;
+    float diff_y = this->center_y - other.center_y;
 
-bool
-Entity::collides_y(Entity& other) {
-    return this->rect.y < other.rect.y + other.rect.h &&
-           this->rect.y + this->rect.h > other.rect.y;
+    float dist_sq = diff_x * diff_x + diff_y * diff_y;
+
+    if (dist_sq > 0 && dist_sq < (this->rect.w * this->rect.w)) { 
+        float dist = SDL_sqrtf(dist_sq);
+
+        float dir_x = diff_x / dist;
+        float dir_y = diff_y / dist;
+
+        float push_strength = 0.1f;
+
+        this->velocity_x += dir_x * push_strength;
+        this->velocity_y += dir_y * push_strength;
+    }
 }
