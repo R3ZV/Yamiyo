@@ -203,19 +203,9 @@ SDL_AppIterate(void* appstate) {
     }
     ImGui::Render();
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.0f, 0.00f, 0.00f, 0.00f);
     SDL_SetRenderDrawColorFloat(state->renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     SDL_RenderClear(state->renderer);
-
-    if (state->last_entities_cnt != state->entities_cnt) {
-        state->game_state.entities_cnt = state->entities_cnt;
-        state->last_entities_cnt = state->entities_cnt;
-        state->game_state.randomise_entities();
-    }
-
-    state->game_state.render_entities();
-    state->game_state.update_entities();
-    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
 
     if (state->show_grid) {
         const int CELL_SIZE = state->game_state.sph.cell_size;
@@ -229,6 +219,17 @@ SDL_AppIterate(void* appstate) {
             SDL_RenderLine(state->renderer, 0, (float)y, (float)state->WIN_WIDTH, (float)y);
         }
     }
+
+
+    if (state->last_entities_cnt != state->entities_cnt) {
+        state->game_state.entities_cnt = state->entities_cnt;
+        state->last_entities_cnt = state->entities_cnt;
+        state->game_state.randomise_entities();
+    }
+
+    state->game_state.render_entities();
+    state->game_state.update_entities();
+    state->game_state.check_collisions(state->WIN_WIDTH, state->WIN_HEIGHT);
 
     SDL_SetRenderScale(state->renderer, state->imgui_io->DisplayFramebufferScale.x, state->imgui_io->DisplayFramebufferScale.y);
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state->renderer);

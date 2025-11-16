@@ -6,6 +6,10 @@ Entity::Entity(float center_x, float center_y, float w, float h) {
     this->velocity_x = 1;
     this->velocity_y = 1;
 
+    if (int32_t(this->center_x) & 1) this->velocity_x *= -1;
+    if (int32_t(this->center_y) & 1) this->velocity_y *= -1;
+
+
     this->rect = SDL_FRect {
         .x = center_x - w / 2,
         .y = center_y - h / 2,
