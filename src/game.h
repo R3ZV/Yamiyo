@@ -4,17 +4,25 @@
 #include <vector>
 #include <random>
 
-#include "entity.h"
 #include "spatial-hashing.h"
 
 struct GameState {
 public:
-    const int32_t MAX_ENTITIES = 100'000;
+    static const int32_t MAX_ENTITIES = 100'000;
     const float ENTITY_HEIGHT = 8;
     const float ENTITY_WIDTH = 8;
 
+    float ents_center_x[MAX_ENTITIES];
+    float ents_center_y[MAX_ENTITIES];
+    float ents_velocity_x[MAX_ENTITIES];
+    float ents_velocity_y[MAX_ENTITIES];
+    int32_t ents_width[MAX_ENTITIES];
+    int32_t ents_height[MAX_ENTITIES];
+
+    SDL_FRect ents_rect[MAX_ENTITIES];
+    SDL_Texture* ents_texture[MAX_ENTITIES];
+
     int32_t entities_cnt;
-    std::vector<Entity> entities;
     std::unordered_map<std::string, SDL_Texture*> textures;
 
     SDL_Renderer *const renderer;
@@ -57,4 +65,7 @@ private:
 
     void
     cleanup_textures();
+
+    void
+    swarm_collision(size_t self_id, size_t other_id);
 };

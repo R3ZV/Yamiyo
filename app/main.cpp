@@ -29,7 +29,6 @@ public:
     ImGuiIO* imgui_io;
     GameState game_state;
 
-
     bool debug_console;
     bool show_grid;
     Uint64 last_step;

@@ -28,7 +28,6 @@ pub fn build(b: *std.Build) !void {
 
 const bin_files = .{ "app/main.cpp" } ++ src_files ++ lib_files;
 const src_files = .{
-    "src/entity.cpp",
     "src/game.cpp",
     "src/spatial-hashing.cpp",
 };

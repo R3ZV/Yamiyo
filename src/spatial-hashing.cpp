@@ -14,20 +14,20 @@ SpatialHash::get_key(int32_t cell_x, int cell_y) {
 }
 
 void
-SpatialHash::insert(Entity* entity) {
-    int32_t cell_x = static_cast<int32_t>(entity->center_x / this->cell_size);
-    int32_t cell_y = static_cast<int32_t>(entity->center_y / this->cell_size);
+SpatialHash::insert(size_t ent_id, float center_x, float center_y) {
+    int32_t cell_x = static_cast<int32_t>(center_x / this->cell_size);
+    int32_t cell_y = static_cast<int32_t>(center_y / this->cell_size);
 
     int32_t key = this->get_key(cell_x, cell_y);
-    cell_map[key].push_back(entity);
+    cell_map[key].push_back(ent_id);
 }
 
-std::vector<Entity*>
-SpatialHash::get_nearby(Entity* entity) {
-    std::vector<Entity*> nearby;
+std::vector<size_t>
+SpatialHash::get_nearby(float center_x, float center_y) {
+    std::vector<size_t> nearby;
 
-    int32_t cell_x = static_cast<int32_t>(entity->center_x / cell_size);
-    int32_t cell_y = static_cast<int32_t>(entity->center_y / cell_size);
+    int32_t cell_x = static_cast<int32_t>(center_x / cell_size);
+    int32_t cell_y = static_cast<int32_t>(center_y / cell_size);
 
     // Check the entity's cell AND the 8 surrounding neighbors
     for (int x = -1; x <= 1; x++) {

@@ -4,12 +4,11 @@
 #include <unordered_map>
 #include <cmath>
 
-#include "entity.h"
-
 struct SpatialHash {
 private:
 
-    std::unordered_map<int, std::vector<Entity*>> cell_map;
+    // (hash_key, entity_id)
+    std::unordered_map<int, std::vector<size_t>> cell_map;
 
     size_t
     get_key(int32_t cell_x, int32_t cell_y);
@@ -22,8 +21,8 @@ public:
     clear();
 
     void
-    insert(Entity* entity);
+    insert(size_t ent_id, float center_x, float center_y);
 
-    std::vector<Entity*>
-    get_nearby(Entity* entity);
+    std::vector<size_t>
+    get_nearby(float center_x, float center_y);
 };

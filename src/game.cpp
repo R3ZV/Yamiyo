@@ -8,7 +8,6 @@ GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_W
     // We want to perfectly divide both win_width and win_height
     sph(8),
     entities_cnt(entities_cnt),
-    entities(size_t(MAX_ENTITIES)),
     renderer(renderer),
     gen(rd()),
     x_dist(ENTITY_WIDTH, static_cast<float>(WIN_WIDTH) - ENTITY_WIDTH),
@@ -46,8 +45,14 @@ GameState::randomise_entities() {
     for (size_t i = 0; i < this->entities_cnt; i++) {
         float center_x = x_dist(gen);
         float center_y = y_dist(gen);
-        entities[i] = Entity(center_x, center_y, ENTITY_WIDTH, ENTITY_HEIGHT,
-                             textures["enemy"]);
+        this->ents_center_x[i] = center_x;
+        this->ents_center_y[i] = center_y;
+        this->ents_rect[i].w = this->ENTITY_WIDTH;
+        this->ents_rect[i].h = this->ENTITY_HEIGHT;
+        this->ents_rect[i].x = this->ents_center_x[i] - float(this->ents_width[i]) / 2;
+        this->ents_rect[i].y = this->ents_center_y[i] - float(this->ents_height[i]) / 2;
+
+        this->ents_texture[i] = textures["enemy"];
     }
     this->compute_spatial_hash();
 }
@@ -56,19 +61,19 @@ void
 GameState::render_entities() {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 255, 255);
     for (size_t i = 0; i < this->entities_cnt; i++) {
-        auto entity = this->entities[i];
-        SDL_RenderTexture(renderer, entity.texture, NULL, &entity.rect);
+        auto entity_rect = this->ents_rect[i];
+        auto entity_texture = this->ents_texture[i];
+        SDL_RenderTexture(renderer, entity_texture, NULL, &entity_rect);
     }
 }
 
 void
 GameState::update_entities() {
     for (size_t i = 0; i < this->entities_cnt; i++) {
-        auto& entity = this->entities[i];
-        entity.center_x += entity.velocity_x;
-        entity.center_y += entity.velocity_y;
-        entity.rect.x  = entity.center_x - entity.rect.w / 2;
-        entity.rect.y  = entity.center_y - entity.rect.h / 2;
+        this->ents_center_x[i] += this->ents_velocity_x[i];
+        this->ents_center_y[i] += this->ents_velocity_y[i];
+        this->ents_rect[i].x = this->ents_center_x[i] - float(this->ents_width[i]) / 2;
+        this->ents_rect[i].y = this->ents_center_y[i] - float(this->ents_height[i]) / 2;
     };
     this->compute_spatial_hash();
 }
@@ -82,13 +87,31 @@ GameState::check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
 void
 GameState::check_collisions_entities() {
     for (size_t i = 0; i < this->entities_cnt; i++) {
-        auto& entity = this->entities[i];
-        auto entities_nearby = this->sph.get_nearby(&entity);
+        auto entities_nearby = this->sph.get_nearby(this->ents_center_x[i], this->ents_center_y[i]);
         for (auto other : entities_nearby) {
-            if (&entity == other) continue;
+            if (i == other) continue;
 
-            entity.swarm_collision(*other);
+            swarm_collision(i, other);
         }
+    }
+}
+void
+GameState::swarm_collision(size_t self_id, size_t other_id) {
+    float diff_x = this->ents_center_x[self_id] - this->ents_center_x[other_id];
+    float diff_y = this->ents_center_y[self_id] - this->ents_center_y[other_id];
+
+    float dist_sq = diff_x * diff_x + diff_y * diff_y;
+
+    if (dist_sq > 0 && dist_sq < (this->ents_rect[self_id].w * this->ents_rect[self_id].w)) { 
+        float dist = SDL_sqrtf(dist_sq);
+
+        float dir_x = diff_x / dist;
+        float dir_y = diff_y / dist;
+
+        float push_strength = 0.1f;
+
+        this->ents_velocity_x[self_id] += dir_x * push_strength;
+        this->ents_velocity_y[self_id] += dir_y * push_strength;
     }
 }
 
@@ -96,21 +119,22 @@ void
 GameState::compute_spatial_hash() {
     this->sph.clear();
     for (size_t i = 0; i < this->entities_cnt; i++) {
-        auto& entity = this->entities[i];
-        this->sph.insert(&entity);
+        this->sph.insert(i, this->ents_center_x[i], this->ents_center_y[i]);
     };
 }
 
 void
 GameState::check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
     for (size_t i = 0; i < this->entities_cnt; i++) {
-        auto& entity = this->entities[i];
-        if (entity.center_x + entity.rect.w >= WIN_WIDTH || entity.center_x - entity.rect.w <= 0) {
-            entity.velocity_x *= -1;
+        if (this->ents_center_x[i] + this->ents_rect[i].w >= WIN_WIDTH ||
+            this->ents_center_x[i] - this->ents_rect[i].w <= 0) {
+
+            this->ents_velocity_x[i] *= -1;
         }
 
-        if (entity.center_y + entity.rect.h >= WIN_HEIGHT || entity.center_y - entity.rect.h <= 0) {
-            entity.velocity_y *= -1;
+        if (this->ents_center_y[i] + this->ents_rect[i].h >= WIN_HEIGHT ||
+            this->ents_center_y[i] - this->ents_rect[i].h <= 0) {
+            this->ents_velocity_y[i] *= -1;
         }
     };
 };
