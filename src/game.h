@@ -6,6 +6,10 @@
 
 #include "spatial-hashing.h"
 
+enum GAME_TEXTURES {
+    ENEMY_TEXTURE,
+};
+
 struct GameState {
 public:
     static const int32_t MAX_ENTITIES = 100'000;
@@ -23,7 +27,7 @@ public:
     SDL_Texture* ents_texture[MAX_ENTITIES];
 
     int32_t entities_cnt;
-    std::unordered_map<std::string, SDL_Texture*> textures;
+    std::vector<SDL_Texture*> textures;
 
     SDL_Renderer *const renderer;
     SpatialHash sph;
@@ -61,7 +65,7 @@ private:
     compute_spatial_hash();
 
     SDL_Texture*
-    get_texture(const std::string& path, const std::string& name);
+    get_texture(const std::string& path, const GAME_TEXTURES name);
 
     void
     cleanup_textures();

@@ -9,16 +9,17 @@ GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_W
     sph(8),
     entities_cnt(entities_cnt),
     renderer(renderer),
+    textures(2, nullptr),
     gen(rd()),
     x_dist(ENTITY_WIDTH, static_cast<float>(WIN_WIDTH) - ENTITY_WIDTH),
     y_dist(ENTITY_HEIGHT, static_cast<float>(WIN_HEIGHT) - ENTITY_HEIGHT) {
 
-    this->get_texture("assets/mob1.png", "enemy");
+    this->get_texture("assets/mob1.png", GAME_TEXTURES::ENEMY_TEXTURE);
 }
 
 SDL_Texture*
-GameState::get_texture(const std::string& path, const std::string& name) {
-    if (textures.find(name) != textures.end()) {
+GameState::get_texture(const std::string& path, const GAME_TEXTURES name) {
+    if (textures[ENEMY_TEXTURE] != nullptr) {
         return textures[name];
     }
 
@@ -34,10 +35,9 @@ GameState::get_texture(const std::string& path, const std::string& name) {
 
 void
 GameState::cleanup_textures() {
-    for (auto& pair : textures) {
-        SDL_DestroyTexture(pair.second);
+    for (auto& texture : textures) {
+        SDL_DestroyTexture(texture);
     }
-    textures.clear();
 }
 
 void
@@ -52,7 +52,7 @@ GameState::randomise_entities() {
         this->ents_rect[i].x = this->ents_center_x[i] - float(this->ents_width[i]) / 2;
         this->ents_rect[i].y = this->ents_center_y[i] - float(this->ents_height[i]) / 2;
 
-        this->ents_texture[i] = textures["enemy"];
+        this->ents_texture[i] = textures[GAME_TEXTURES::ENEMY_TEXTURE];
     }
     this->compute_spatial_hash();
 }
@@ -101,8 +101,9 @@ GameState::swarm_collision(size_t self_id, size_t other_id) {
     float diff_y = this->ents_center_y[self_id] - this->ents_center_y[other_id];
 
     float dist_sq = diff_x * diff_x + diff_y * diff_y;
+    float radius_sq = this->ents_rect[self_id].w * this->ents_rect[self_id].w;
 
-    if (dist_sq > 0 && dist_sq < (this->ents_rect[self_id].w * this->ents_rect[self_id].w)) { 
+    if (dist_sq > 0 && dist_sq < radius_sq) { 
         float dist = SDL_sqrtf(dist_sq);
 
         float dir_x = diff_x / dist;
