@@ -26,7 +26,7 @@ pub fn build(b: *std.Build) !void {
     build_bin(b, target, optimize);
 }
 
-const bin_files = .{ "app/main.cpp" } ++ src_files ++ lib_files;
+const bin_files = .{"app/main.cpp"} ++ src_files ++ lib_files;
 const src_files = .{
     "src/game.cpp",
     "src/spatial-hashing.cpp",
@@ -35,11 +35,11 @@ const src_files = .{
 const lib_files = .{
     "libs/imgui/imgui.cpp",
     "libs/imgui/imgui_impl_sdl3.cpp",
-    "libs/imgui/imgui_impl_sdlrenderer3.cpp", 
-    "libs/imgui/imgui_draw.cpp", 
-    "libs/imgui/imgui_demo.cpp", 
-    "libs/imgui/imgui_widgets.cpp", 
-    "libs/imgui/imgui_tables.cpp", 
+    "libs/imgui/imgui_impl_sdlrenderer3.cpp",
+    "libs/imgui/imgui_draw.cpp",
+    "libs/imgui/imgui_demo.cpp",
+    "libs/imgui/imgui_widgets.cpp",
+    "libs/imgui/imgui_tables.cpp",
 };
 
 fn build_bin(
@@ -47,7 +47,15 @@ fn build_bin(
     target: ResolvedTarget,
     optimize: OptimizeMode,
 ) void {
-    const sdl3_image = b.dependency("SDL_image", .{}).artifact("SDL3_image");
+    const sdl3_image = b.dependency("SDL_image", .{
+        .optimize = optimize,
+        .target = target,
+    }).artifact("SDL3_image");
+
+    const sdl = b.dependency("sdl", .{
+        .optimize = optimize,
+        .target = target,
+    });
 
     const exe = b.addExecutable(.{
         .name = "yamiyo",
@@ -58,9 +66,9 @@ fn build_bin(
         }),
     });
 
+    exe.linkLibrary(sdl.artifact("SDL3"));
     exe.linkLibrary(sdl3_image);
     exe.linkLibCpp();
-    exe.linkSystemLibrary("SDL3");
 
     exe.addCSourceFiles(.{
         .files = &bin_files,
@@ -78,5 +86,4 @@ fn build_bin(
     run_step.dependOn(&run_cmd.step);
 
     b.installArtifact(exe);
-
 }

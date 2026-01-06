@@ -8,6 +8,10 @@
             .url = "git+https://github.com/allyourcodebase/SDL_image#76e7805e9eafe7a0f70f94c530404028e1ebef5a",
             .hash = "SDL_image-3.2.4--aJoHdEWAAA5k-xEw-utp5jx3Pdu-BffbYDg7kYyXR2e",
         },
+        .sdl = .{
+            .url = "git+https://github.com/allyourcodebase/SDL3#c3f68c729483c7d7599868c2a01172dc2a742c96",
+            .hash = "sdl-0.0.0-i4QD0Up9qQCLBJcPR_YpCtGG1hSdL1QiD_OXw4uO5Pi1",
+        },
     },
     .paths = .{
         "build.zig",
