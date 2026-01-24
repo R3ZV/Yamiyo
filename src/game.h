@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL_render.h>
 #include <vector>
+#include <future>
+#include <thread>
 #include <random>
 
 #include "spatial-hashing.h"
@@ -55,6 +57,9 @@ public:
     check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
 
 private:
+    void
+    check_collisions_worker(size_t start_index, size_t end_index);
+
     void
     check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
 

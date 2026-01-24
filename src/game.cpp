@@ -86,15 +86,41 @@ GameState::check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
 
 void
 GameState::check_collisions_entities() {
-    for (size_t i = 0; i < this->entities_cnt; i++) {
+    uint32_t thread_count = std::thread::hardware_concurrency();
+    if (thread_count == 0) thread_count = 2;
+
+    size_t chunk_size = this->entities_cnt / thread_count;
+    std::vector<std::future<void>> futures;
+
+    for (uint32_t i = 0; i < thread_count - 1; ++i) {
+        size_t start = i * chunk_size;
+        size_t end = start + chunk_size;
+
+        futures.push_back(std::async(std::launch::async, [this, start, end]() {
+            this->check_collisions_worker(start, end);
+        }));
+    }
+
+    size_t last_start = (thread_count - 1) * chunk_size;
+    this->check_collisions_worker(last_start, this->entities_cnt);
+
+    for (auto& future : futures) {
+        future.get();
+    }
+}
+
+void
+GameState::check_collisions_worker(size_t start_index, size_t end_index) {
+    for (size_t i = start_index; i < end_index; i++) {
         auto entities_nearby = this->sph.get_nearby(this->ents_center_x[i], this->ents_center_y[i]);
+
         for (auto other : entities_nearby) {
             if (i == other) continue;
-
             swarm_collision(i, other);
         }
     }
 }
+
 void
 GameState::swarm_collision(size_t self_id, size_t other_id) {
     float diff_x = this->ents_center_x[self_id] - this->ents_center_x[other_id];
