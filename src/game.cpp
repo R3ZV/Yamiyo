@@ -6,7 +6,7 @@
 
 GameState::GameState(int32_t entities_cnt, SDL_Renderer* renderer, int32_t WIN_WIDTH, int32_t WIN_HEIGHT) :
     // We want to perfectly divide both win_width and win_height
-    sph(8),
+    sph(8, WIN_WIDTH, WIN_HEIGHT),
     entities_cnt(entities_cnt),
     renderer(renderer),
     textures(2, nullptr),
@@ -111,10 +111,13 @@ GameState::check_collisions_entities() {
 
 void
 GameState::check_collisions_worker(size_t start_index, size_t end_index) {
-    for (size_t i = start_index; i < end_index; i++) {
-        auto entities_nearby = this->sph.get_nearby(this->ents_center_x[i], this->ents_center_y[i]);
+    std::vector<size_t> nearby_cache(64);
 
-        for (auto other : entities_nearby) {
+    for (size_t i = start_index; i < end_index; i++) {
+        nearby_cache.clear();
+        this->sph.get_nearby(this->ents_center_x[i], this->ents_center_y[i], nearby_cache);
+
+        for (auto other : nearby_cache) {
             if (i == other) continue;
             swarm_collision(i, other);
         }
