@@ -61,10 +61,7 @@ private:
     check_collisions_worker(size_t start_index, size_t end_index);
 
     void
-    check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT);
-
-    void
-    check_collisions_entities();
+    check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT, size_t start, size_t end);
 
     void
     compute_spatial_hash();

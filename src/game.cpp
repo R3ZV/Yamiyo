@@ -78,14 +78,9 @@ GameState::update_entities() {
     this->compute_spatial_hash();
 }
 
-void
-GameState::check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
-    this->check_collisions_borders(WIN_WIDTH, WIN_HEIGHT);
-    this->check_collisions_entities();
-}
 
 void
-GameState::check_collisions_entities() {
+GameState::check_collisions(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
     uint32_t thread_count = std::thread::hardware_concurrency();
     if (thread_count == 0) thread_count = 2;
 
@@ -96,8 +91,9 @@ GameState::check_collisions_entities() {
         size_t start = i * chunk_size;
         size_t end = start + chunk_size;
 
-        futures.push_back(std::async(std::launch::async, [this, start, end]() {
+        futures.push_back(std::async(std::launch::async, [this, start, end, WIN_WIDTH, WIN_HEIGHT]() {
             this->check_collisions_worker(start, end);
+            this->check_collisions_borders(WIN_WIDTH, WIN_HEIGHT, start, end);
         }));
     }
 
@@ -154,8 +150,8 @@ GameState::compute_spatial_hash() {
 }
 
 void
-GameState::check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT) {
-    for (size_t i = 0; i < this->entities_cnt; i++) {
+GameState::check_collisions_borders(const int32_t WIN_WIDTH, const int32_t WIN_HEIGHT, size_t start, size_t end) {
+    for (size_t i = start; i < end; i++) {
         if (this->ents_center_x[i] + this->ents_rect[i].w >= WIN_WIDTH ||
             this->ents_center_x[i] - this->ents_rect[i].w <= 0) {
 
